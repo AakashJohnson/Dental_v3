@@ -1,6 +1,13 @@
 /** Thin fetch wrapper that injects the JWT and normalises errors. */
 const TOKEN_KEY = 'dd_token';
 
+/**
+ * Base URL for the API. In dev this stays empty so calls hit `/api` and the
+ * Vite proxy forwards to localhost. In production (Vercel) set VITE_API_URL to
+ * the Render backend origin, e.g. https://dental-v3.onrender.com
+ */
+const API_BASE = ((import.meta as any).env?.VITE_API_URL ?? '').replace(/\/$/, '');
+
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }
@@ -13,7 +20,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE}/api${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
