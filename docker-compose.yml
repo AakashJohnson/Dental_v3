@@ -1,0 +1,19 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: dantadrishti-mongo
+    restart: unless-stopped
+    ports:
+      # Host 27018 avoids clashing with other local MongoDB instances.
+      # The backend connects via MONGODB_URI (defaults to localhost:27018).
+      - "27018:27017"
+    volumes:
+      - dantadrishti_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  dantadrishti_mongo_data:

@@ -1,0 +1,679 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-ivory-100 text-ink font-sans antialiased;
+  background-image: radial-gradient(70% 50% at 50% -10%, rgba(13, 92, 92, 0.06), transparent 60%);
+}
+
+/* Premium institutional card surface (light glass on paper). */
+.gov-card {
+  @apply relative rounded-2xl border border-teal/10 bg-white/80 shadow-card backdrop-blur-sm;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+.gov-card-solid {
+  @apply relative rounded-2xl border border-teal/10 bg-white shadow-card;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+/* Gentle premium hover lift — applies to every card unless it opts out. */
+.gov-card:hover,
+.gov-card-solid:hover {
+  @apply border-teal/25 shadow-card-lg;
+  transform: translateY(-2px);
+}
+/* Opt-out for large static panels that shouldn't move on hover. */
+.gov-card.no-lift:hover,
+.gov-card-solid.no-lift:hover {
+  transform: none;
+}
+
+/* Subtle paper + proforma texture overlays. */
+.tex-proforma {
+  background-image: theme('backgroundImage.proforma');
+  background-size: theme('backgroundSize.proforma');
+}
+.tex-ashoka {
+  background-image: theme('backgroundImage.ashoka');
+  background-size: theme('backgroundSize.ashoka');
+}
+
+/* Gold regulatory seal ring. */
+.seal-ring {
+  position: relative;
+}
+.seal-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(120deg, #b8860b, #d4a72c 45%, #7c2d12);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* AI scan-line overlay for inspection frames. */
+.scan-frame {
+  position: relative;
+  overflow: hidden;
+}
+.scan-frame::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, transparent, rgba(13, 92, 92, 0.18), transparent);
+  animation: scanline 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(120deg, #0d5c5c, #1d4ed8 50%, #ea7317);
+}
+
+/* Tricolour government accent rule. */
+.tricolour {
+  background: linear-gradient(90deg, #ff9933 0 33%, #ffffff 33% 66%, #138808 66% 100%);
+}
+
+/* ============================================================
+   HOVER EFFECT LIBRARY  (paired with effects/hoverEffects.ts)
+   ============================================================ */
+.hover-lift {
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.hover-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06), 0 30px 70px rgba(15, 23, 42, 0.12);
+}
+.hover-glow {
+  transition: box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.hover-glow:hover {
+  border-color: rgba(37, 99, 235, 0.25);
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.12), 0 20px 50px -24px rgba(37, 99, 235, 0.4);
+}
+/* Diagonal shine sweep. */
+.hover-shine {
+  position: relative;
+  overflow: hidden;
+}
+.hover-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 80%;
+  height: 100%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transition: left 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.hover-shine:hover::after {
+  left: 130%;
+}
+/* Image zoom — apply `hx-img` to the inner image/bg element. */
+.hover-image-zoom {
+  overflow: hidden;
+}
+.hover-image-zoom .hx-img {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.hover-image-zoom:hover .hx-img {
+  transform: scale(1.06);
+}
+/* Scanning gradient border. */
+.hover-border-scan {
+  position: relative;
+}
+.hover-border-scan::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(120deg, transparent, rgba(13, 92, 92, 0.7), rgba(29, 78, 216, 0.7), transparent);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.hover-border-scan:hover::before {
+  opacity: 1;
+  animation: borderscan 2.4s linear infinite;
+}
+.hover-soft-tilt {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hover-soft-tilt:hover {
+  transform: perspective(900px) rotateX(2.5deg) rotateY(-2.5deg) translateY(-4px);
+}
+.hover-stat-pop {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hover-stat-pop:hover {
+  transform: scale(1.06);
+}
+
+/* Domain composites. */
+.hover-map-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-map-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 18px 46px -22px rgba(13, 92, 92, 0.5);
+}
+.hover-dashboard-card {
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.32s ease, border-color 0.32s ease;
+}
+.hover-dashboard-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(13, 92, 92, 0.3);
+  box-shadow: 0 2px 6px rgba(16, 40, 40, 0.06), 0 26px 60px -28px rgba(13, 92, 92, 0.42);
+}
+.hover-document-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-document-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 44px -22px rgba(184, 134, 11, 0.4);
+}
+.hover-risk-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-risk-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 46px -22px rgba(220, 38, 38, 0.45);
+}
+.hover-ai-card {
+  transition: transform 0.32s ease, box-shadow 0.32s ease;
+}
+.hover-ai-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 0 1px rgba(29, 78, 216, 0.25), 0 24px 56px -26px rgba(29, 78, 216, 0.5);
+}
+.hover-nav-item {
+  position: relative;
+  transition: color 0.25s ease;
+}
+.hover-nav-item::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 2px;
+  width: 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #0d5c5c, #1d4ed8);
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hover-nav-item:hover::after {
+  width: 100%;
+}
+.hover-row {
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+.hover-row:hover {
+  background-color: rgba(13, 92, 92, 0.05);
+  box-shadow: inset 3px 0 0 #0d5c5c;
+  transform: translateX(2px);
+}
+
+/* Premium button effects. */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.btn-glow:hover {
+  box-shadow: 0 0 0 1px rgba(13, 92, 92, 0.25), 0 14px 34px -14px rgba(13, 92, 92, 0.6);
+}
+.btn-glow:active {
+  transform: scale(0.97);
+}
+.btn-glow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 70%;
+  height: 100%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transition: left 0.6s ease;
+}
+.btn-glow:hover::after {
+  left: 130%;
+}
+
+/* ============================================================
+   PHOTOREALISTIC DEV PLACEHOLDER (only shown until real raster
+   images are dropped into /src/assets/real/*.webp)
+   ============================================================ */
+.photo-pending {
+  background-color: #0f2a2a;
+  background-image:
+    radial-gradient(120% 90% at 18% 0%, rgba(29, 78, 216, 0.45), transparent 55%),
+    radial-gradient(120% 100% at 100% 100%, rgba(234, 115, 23, 0.4), transparent 55%),
+    linear-gradient(135deg, #0a3a3a 0%, #0d5c5c 45%, #07314d 100%);
+  position: relative;
+  overflow: hidden;
+}
+.photo-pending::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ============================================================
+   LEAFLET — real tile map theming
+   ============================================================ */
+.leaflet-container {
+  font: inherit;
+  background: #e8eef0;
+  border-radius: 1rem;
+}
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+}
+.leaflet-bar a {
+  color: #0d5c5c !important;
+}
+/* Custom pulsing inspection markers (divIcon). */
+.dd-marker {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+.dd-marker .dd-dot {
+  position: absolute;
+  inset: 3px;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.dd-marker .dd-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  animation: marker 2.2s ease-in-out infinite;
+}
+.dd-marker.is-risk .dd-ring {
+  animation: riskglow 1.6s ease-in-out infinite;
+}
+/* Cluster bubble. */
+.dd-cluster {
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  color: #fff;
+  font-weight: 700;
+  font-family: 'Space Grotesk', Inter, sans-serif;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 18px -6px rgba(13, 92, 92, 0.6);
+  background: radial-gradient(circle at 30% 30%, #0f6e6e, #0a4747);
+  animation: clusterbounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 14px !important;
+  box-shadow: 0 18px 50px -20px rgba(13, 92, 92, 0.5) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+.leaflet-popup-content {
+  margin: 0 !important;
+  width: 248px !important;
+}
+.leaflet-popup-tip {
+  box-shadow: 0 18px 50px -20px rgba(13, 92, 92, 0.5) !important;
+}
+
+/* ============================================================
+   ANIMATED BACKGROUND PRIMITIVES
+   ============================================================ */
+.bg-moving-grid {
+  background-image:
+    linear-gradient(rgba(13, 92, 92, 0.13) 1.3px, transparent 1.3px),
+    linear-gradient(90deg, rgba(13, 92, 92, 0.13) 1.3px, transparent 1.3px);
+  background-size: 44px 44px;
+  animation: gridmove 7s linear infinite;
+}
+
+/* Slow-rotating conic gradient — bold ambient color sweep behind content. */
+.bg-conic-rotate {
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(13, 92, 92, 0.09),
+    rgba(29, 78, 216, 0.10),
+    rgba(234, 115, 23, 0.07),
+    rgba(184, 134, 11, 0.07),
+    rgba(13, 92, 92, 0.09)
+  );
+  animation: conicspin 40s linear infinite;
+  filter: blur(40px);
+}
+.bg-paper-motion {
+  background-image: radial-gradient(rgba(13, 92, 92, 0.05) 1px, transparent 1.6px);
+  background-size: 18px 18px;
+  animation: papershift 14s ease-in-out infinite;
+}
+
+@keyframes borderscan {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+@keyframes riskglow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.55); transform: scale(1); }
+  50% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); transform: scale(1.3); }
+}
+@keyframes clusterbounce {
+  0% { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes gridmove {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 0 44px, 44px 0; }
+}
+@keyframes conicspin {
+  to { transform: rotate(360deg); }
+}
+
+/* Compositor-driven background animations (run off the main thread so they
+   never stutter while the page is scrolling). Per-element vari/delay/duration
+   are set inline; distances come from CSS custom properties. */
+.bg-particle {
+  will-change: transform, opacity;
+  animation: bgparticle var(--dur, 7s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+.bg-orb {
+  will-change: transform, opacity;
+  animation: bgorb var(--dur, 16s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+.bg-aurora-blob { will-change: transform; }
+.bg-aurora-a { animation: bgaurora-a 24s ease-in-out infinite; }
+.bg-aurora-b { animation: bgaurora-b 28s ease-in-out infinite; }
+.bg-aurora-c { animation: bgaurora-c 30s ease-in-out infinite; }
+.bg-radar-ring {
+  will-change: transform, opacity;
+  animation: bgradar 6s ease-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes bgparticle {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+  50% { opacity: var(--op, 0.8); transform: translateY(var(--drift, -30px)) scale(1.15); }
+}
+@keyframes bgorb {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(0.7); }
+  50% { opacity: var(--op, 0.18); transform: translateY(-40px) scale(1.1); }
+}
+@keyframes bgaurora-a { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(60px, 40px); } }
+@keyframes bgaurora-b { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-50px, 50px); } }
+@keyframes bgaurora-c { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(40px, -30px); } }
+@keyframes bgradar { 0% { transform: scale(0.3); opacity: 0.5; } 100% { transform: scale(6); opacity: 0; } }
+
+/* Themed background motif drifts (tooth / contours / dots). */
+.motif-drift { animation: motifdrift 26s ease-in-out infinite; }
+.motif-contour-a { animation: motifcontour-a 30s ease-in-out infinite; }
+.motif-contour-b { animation: motifcontour-b 36s ease-in-out infinite; }
+.motif-dots { animation: motifdots 18s ease-in-out infinite; }
+@keyframes motifdrift {
+  0%, 100% { background-position: 0 0; }
+  50% { background-position: 48px 34px; }
+}
+@keyframes motifcontour-a {
+  0%, 100% { background-position: 0 0; }
+  50% { background-position: 24px -18px; }
+}
+@keyframes motifcontour-b {
+  0%, 100% { background-position: 0 0; }
+  50% { background-position: -22px 20px; }
+}
+@keyframes motifdots {
+  0%, 100% { background-position: 0 0; }
+  50% { background-position: 9px 9px; }
+}
+@keyframes papershift {
+  0%, 100% { background-position: 0 0; }
+  50% { background-position: 9px 9px; }
+}
+@keyframes drawroute {
+  to { stroke-dashoffset: 0; }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-teal/20 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-teal/30;
+}
+
+/* ============================================================
+   3D MOTION LAYER — perspective, tilt, depth, glow, float
+   GPU-friendly (transform/opacity/filter). Government-clean.
+   ============================================================ */
+
+/* Perspective scene wrapper for CSS-only tilt children. */
+.scene-3d { perspective: 1000px; }
+
+/* Layered depth shadow for floating panels. */
+.depth-shadow {
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.04),
+    0 18px 50px rgba(15, 23, 42, 0.08);
+}
+.depth-shadow-lg {
+  box-shadow:
+    0 6px 18px rgba(15, 23, 42, 0.06),
+    0 30px 70px rgba(15, 23, 42, 0.12);
+}
+
+/* CSS-only 3D tilt + lift on hover (no JS needed). */
+.tilt-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
+  will-change: transform;
+}
+.tilt-3d:hover {
+  transform: perspective(800px) translateY(-6px) rotateX(4deg) rotateY(-4deg);
+  box-shadow:
+    0 18px 34px -10px rgba(16, 38, 54, 0.22),
+    0 36px 70px -20px rgba(29, 78, 216, 0.18);
+}
+.tilt-3d-strong:hover {
+  transform: perspective(800px) translateY(-10px) rotateX(7deg) rotateY(-7deg) scale(1.015);
+}
+
+/* Gentle idle float for floating panels/badges. */
+@keyframes floaty-kf {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+.floaty { animation: floaty-kf 5.5s ease-in-out infinite; }
+.floaty-slow { animation: floaty-kf 8s ease-in-out infinite; }
+
+/* Edge glow halos. */
+.glow-edge { box-shadow: 0 0 0 1px rgba(13, 92, 92, 0.12), 0 0 26px -6px rgba(13, 92, 92, 0.35); }
+.glow-edge-teal { box-shadow: 0 0 0 1px rgba(13, 92, 92, 0.18), 0 0 30px -6px rgba(13, 92, 92, 0.5); }
+.glow-edge-royal { box-shadow: 0 0 0 1px rgba(29, 78, 216, 0.18), 0 0 30px -6px rgba(29, 78, 216, 0.5); }
+.glow-edge-risk { box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.18), 0 0 30px -6px rgba(220, 38, 38, 0.5); }
+@keyframes glow-pulse-kf {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(29, 78, 216, 0.14), 0 0 18px -8px rgba(29, 78, 216, 0.4); }
+  50% { box-shadow: 0 0 0 1px rgba(29, 78, 216, 0.3), 0 0 34px -6px rgba(29, 78, 216, 0.7); }
+}
+.glow-pulse { animation: glow-pulse-kf 3s ease-in-out infinite; }
+
+/* Animated shimmer border. */
+.shimmer-border {
+  position: relative;
+}
+.shimmer-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(120deg, transparent 20%, rgba(103, 232, 249, 0.6), transparent 60%);
+  background-size: 200% 100%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: shimmer-kf 3.5s linear infinite;
+  pointer-events: none;
+}
+@keyframes shimmer-kf { to { background-position: -200% 0; } }
+
+/* 3D depth grid background. */
+@keyframes grid3d-kf { to { background-position: 0 40px; } }
+.bg-grid-3d {
+  background-image:
+    linear-gradient(rgba(13, 92, 92, 0.11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 92, 92, 0.11) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: grid3d-kf 6s linear infinite;
+}
+
+/* ---- Named background texture utilities (compose directly on sections) ---- */
+@keyframes bgslide-kf { to { background-position: 60px 60px; } }
+@keyframes bgaurora-kf {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.bg-government-depth {
+  background:
+    radial-gradient(1100px 520px at 12% -10%, rgba(13, 92, 92, 0.12), transparent 60%),
+    radial-gradient(1000px 520px at 100% 0%, rgba(29, 78, 216, 0.12), transparent 60%),
+    radial-gradient(900px 600px at 50% 120%, rgba(234, 115, 23, 0.08), transparent 60%);
+}
+.bg-inspection-grid {
+  background-image:
+    linear-gradient(rgba(13, 92, 92, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 92, 92, 0.08) 1px, transparent 1px);
+  background-size: 38px 38px;
+  animation: bgslide-kf 14s linear infinite;
+}
+.bg-dashboard-depth {
+  background-image:
+    radial-gradient(700px 360px at 0% 0%, rgba(13, 92, 92, 0.10), transparent 60%),
+    radial-gradient(700px 360px at 100% 30%, rgba(29, 78, 216, 0.09), transparent 60%),
+    linear-gradient(rgba(13, 92, 92, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 92, 92, 0.05) 1px, transparent 1px);
+  background-size: auto, auto, 44px 44px, 44px 44px;
+}
+.bg-proforma-paper {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(28, 39, 51, 0.035) 0, rgba(28, 39, 51, 0.035) 1px, transparent 1px, transparent 22px);
+}
+.bg-dental-pattern {
+  background-image: radial-gradient(rgba(13, 92, 92, 0.07) 1.1px, transparent 1.2px);
+  background-size: 26px 26px;
+}
+.bg-evidence-nodes {
+  background-image: radial-gradient(rgba(29, 78, 216, 0.10) 1.4px, transparent 1.5px);
+  background-size: 34px 34px;
+  animation: bgslide-kf 22s linear infinite;
+}
+.bg-aurora-motion {
+  background: linear-gradient(120deg, rgba(13, 92, 92, 0.12), rgba(29, 78, 216, 0.12), rgba(234, 115, 23, 0.08), rgba(13, 92, 92, 0.12));
+  background-size: 300% 300%;
+  animation: bgaurora-kf 22s ease infinite;
+}
+.bg-ai-scan {
+  position: relative;
+}
+.bg-ai-scan::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, rgba(34, 211, 238, 0.16), transparent);
+  height: 26%;
+  animation: scanline 4.5s linear infinite;
+  pointer-events: none;
+}
+.bg-map-pulse {
+  position: relative;
+}
+.bg-map-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 22% 34%, rgba(21, 128, 61, 0.10), transparent 14%),
+    radial-gradient(circle at 66% 26%, rgba(234, 115, 23, 0.10), transparent 14%),
+    radial-gradient(circle at 46% 64%, rgba(29, 78, 216, 0.10), transparent 14%);
+  pointer-events: none;
+}
+
+/* ---- Background-aware hover utilities ---- */
+.hover-depth-glow {
+  transition: box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hover-depth-glow:hover {
+  box-shadow:
+    0 18px 34px -12px rgba(16, 38, 54, 0.24),
+    0 0 0 1px rgba(29, 78, 216, 0.16),
+    0 0 30px -4px rgba(29, 78, 216, 0.34);
+}
+.hover-card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
+}
+.hover-card-3d:hover {
+  transform: perspective(820px) translateY(-6px) rotateX(4deg) rotateY(-4deg);
+}
+.hover-bg-activate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(420px 220px at var(--mx, 50%) var(--my, 0%), rgba(29, 78, 216, 0.10), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.hover-bg-activate:hover::before { opacity: 1; }
+
+/* Respect reduced motion preferences globally. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .tilt-3d:hover, .tilt-3d-strong:hover { transform: none; }
+}

@@ -1,0 +1,12 @@
+Place the demo dental-clinic videos here so the AI inspection can stream them.
+
+Expected filenames (served at /demo/<name> by Vite):
+  dental_clinic_1.mp4
+  dental_clinic_2.mp4
+  dental_clinic_3.mp4
+  dental_clinic_4.mp4
+  dental_clinic_5.mp4
+
+Copy the provided .mp4 files into this folder (frontend/public/demo/).
+The COCO-SSD inspector also accepts any local clip via the "Upload clip" button,
+so it works even before these files are added.
