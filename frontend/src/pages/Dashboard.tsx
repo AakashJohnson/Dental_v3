@@ -6,6 +6,7 @@ import { useAuth } from '../store/auth';
 import { RoleBadge, StatusPill } from '../design-system/components';
 import { roleColors, roleLabels, stateLabels } from '../design-system/tokens';
 import { ROLE_DASHBOARDS, ROLE_ACTIVITY, Kpi } from '../data/demoDashboardData';
+import { DEMO_APPLICATIONS } from '../data/demoQueueData';
 import { RoleCharts } from './dashboards/RoleCharts';
 import { RoleStatsGrid, ResponsibilityCard, RoleTaskQueue, ActivityTimeline, SectionTitle } from '../components/dashboard/primitives';
 
@@ -20,11 +21,14 @@ interface DashboardData {
 }
 
 export function Dashboard() {
-  const { user } = useAuth();
+  const { user, devMode } = useAuth();
   const role = user?.role ?? '';
   const { data } = useQuery({ queryKey: ['dashboard'], queryFn: () => api.get<DashboardData>('/dashboard') });
   const apps = useQuery({ queryKey: ['applications'], queryFn: () => api.get<any[]>('/applications') });
   const accent = roleColors[role] ?? '#0d5c5c';
+
+  // Dev/demo mode: backend calls resolve null, so seed applications from demo data.
+  const appList = devMode && !(apps.data ?? []).length ? DEMO_APPLICATIONS : apps.data ?? [];
 
   const demo = ROLE_DASHBOARDS[role];
   // Prefer rich role demo KPIs (more cards + tones); supplement with live counts.
@@ -59,7 +63,7 @@ export function Dashboard() {
           </div>
           <div className="flex gap-3">
             <div className="rounded-xl bg-teal-soft px-4 py-3 text-center">
-              <div className="font-display text-2xl font-bold text-teal-dark">{data?.counts?.total ?? apps.data?.length ?? 0}</div>
+              <div className="font-display text-2xl font-bold text-teal-dark">{data?.counts?.total ?? (appList.length || 0)}</div>
               <div className="text-[11px] uppercase tracking-wide text-teal-dark/80">In your scope</div>
             </div>
             {(role === 'APPLICANT' || role === 'CONSULTANT') && (
@@ -95,13 +99,13 @@ export function Dashboard() {
           <div>
             <SectionTitle icon={<FolderOpen size={16} />}>Applications</SectionTitle>
             <div className="gov-card divide-y divide-teal/8">
-              {(apps.data ?? []).slice(0, 6).map((a) => (
+              {appList.slice(0, 6).map((a) => (
                 <Link key={a.id} to={`/app/application/${a.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-teal-soft/40">
                   <div className="text-sm font-medium text-ink">{a.code}</div>
                   <StatusPill state={a.state} />
                 </Link>
               ))}
-              {(apps.data ?? []).length === 0 && <div className="px-4 py-6 text-sm text-ink-muted">No applications in scope.</div>}
+              {appList.length === 0 && <div className="px-4 py-6 text-sm text-ink-muted">No applications in scope.</div>}
             </div>
           </div>
           <ActivityTimeline items={activity} />

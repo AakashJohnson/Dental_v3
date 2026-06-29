@@ -9,17 +9,36 @@ export interface AuthUser {
   collegeId?: string;
 }
 
+/**
+ * Dev/demo mode: a client-only session that never touches the backend. The
+ * fake user is persisted so a page refresh keeps you signed in. Data pages
+ * fall back to their bundled demo data when API calls return nothing.
+ */
+const DEV_USER_KEY = 'dd_dev_user';
+
+function readDevUser(): AuthUser | null {
+  try {
+    const raw = localStorage.getItem(DEV_USER_KEY);
+    return raw ? (JSON.parse(raw) as AuthUser) : null;
+  } catch {
+    return null;
+  }
+}
+
 interface AuthState {
   user: AuthUser | null;
+  devMode: boolean;
   loading: boolean;
   error: string | null;
   login: (username: string, password: string) => Promise<void>;
+  devLogin: (user: AuthUser) => void;
   restore: () => Promise<void>;
   logout: () => void;
 }
 
 export const useAuth = create<AuthState>((set) => ({
   user: null,
+  devMode: false,
   loading: false,
   error: null,
   async login(username, password) {
@@ -30,13 +49,24 @@ export const useAuth = create<AuthState>((set) => ({
         password,
       });
       setToken(res.token);
-      set({ user: res.user, loading: false });
+      localStorage.removeItem(DEV_USER_KEY);
+      set({ user: res.user, devMode: false, loading: false });
     } catch (e) {
       set({ error: (e as Error).message, loading: false });
       throw e;
     }
   },
+  devLogin(user) {
+    setToken(null);
+    localStorage.setItem(DEV_USER_KEY, JSON.stringify(user));
+    set({ user, devMode: true, error: null, loading: false });
+  },
   async restore() {
+    const devUser = readDevUser();
+    if (devUser) {
+      set({ user: devUser, devMode: true });
+      return;
+    }
     try {
       const user = await api.get<AuthUser>('/auth/me');
       set({ user });
@@ -47,6 +77,7 @@ export const useAuth = create<AuthState>((set) => ({
   },
   logout() {
     setToken(null);
-    set({ user: null });
+    localStorage.removeItem(DEV_USER_KEY);
+    set({ user: null, devMode: false });
   },
 }));

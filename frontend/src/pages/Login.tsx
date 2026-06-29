@@ -1,8 +1,8 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, KeyRound, User2, ArrowLeft, Fingerprint } from 'lucide-react';
-import { useAuth } from '../store/auth';
+import { ShieldCheck, KeyRound, User2, ArrowLeft, Fingerprint, Code2 } from 'lucide-react';
+import { useAuth, AuthUser } from '../store/auth';
 import { BrandLockup, GovPartnerEmblems, TricolourRule } from '../components/Branding';
 import { PhotoImage } from '../components/visuals/PhotoImage';
 import { PageBackground } from '../components/visuals/AnimatedBackgrounds';
@@ -28,16 +28,33 @@ const ROLE_USER: { role: string; user: string; group: 'College' | 'Regulator' | 
 const GROUPS = ['College', 'Regulator', 'Decision', 'Admin'] as const;
 
 export function Login() {
-  const { login, loading, error } = useAuth();
+  const { login, devLogin, loading, error } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('applicant_new_college');
   const [password, setPassword] = useState('Passw0rd!');
   const [tab, setTab] = useState<(typeof GROUPS)[number]>('College');
   const [localErr, setLocalErr] = useState('');
+  const [devMode, setDevMode] = useState(false);
+
+  /** Build a client-only demo user from the selected username (no backend). */
+  function makeDevUser(): AuthUser {
+    const entry = ROLE_USER.find((r) => r.user === username) ?? ROLE_USER[0];
+    return {
+      id: `dev-${entry.role.toLowerCase()}`,
+      name: roleLabels[entry.role] ?? entry.role,
+      role: entry.role,
+      username: entry.user,
+    };
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setLocalErr('');
+    if (devMode) {
+      devLogin(makeDevUser());
+      navigate('/app');
+      return;
+    }
     if (!username.trim()) return setLocalErr('Enter your username.');
     if (!password) return setLocalErr('Enter your password.');
     try {
@@ -88,6 +105,25 @@ export function Login() {
             <div className="mb-1 font-display text-xl font-bold text-ink">Sign in</div>
             <p className="mb-5 text-sm text-ink-muted">Choose your role group and continue.</p>
 
+            <button
+              type="button"
+              onClick={() => setDevMode((v) => !v)}
+              className={`mb-4 flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left transition hover-lift ${
+                devMode ? 'border-royal bg-royal/5' : 'border-teal/15 bg-white'
+              }`}
+            >
+              <span className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <Code2 size={15} className={devMode ? 'text-royal' : 'text-ink-muted'} />
+                Dev mode (no backend)
+              </span>
+              <span
+                className={`relative h-5 w-9 rounded-full transition ${devMode ? 'bg-royal' : 'bg-ivory-300'}`}
+                aria-hidden
+              >
+                <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition ${devMode ? 'left-[18px]' : 'left-0.5'}`} />
+              </span>
+            </button>
+
             <div className="mb-4 grid grid-cols-4 gap-1 rounded-xl bg-ivory-200 p-1">
               {GROUPS.map((g) => (
                 <button key={g} onClick={() => setTab(g)} className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition ${tab === g ? 'bg-white text-teal-dark shadow-card' : 'text-ink-muted'}`}>
@@ -119,18 +155,20 @@ export function Login() {
                   <input value={username} onChange={(e) => setUsername(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-medium text-ink-soft">Password</label>
-                <div className="mt-1 flex items-center gap-2 rounded-xl border border-teal/20 bg-ivory-50 px-3 py-2.5">
-                  <KeyRound size={15} className="text-ink-muted" />
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
+              {!devMode && (
+                <div>
+                  <label className="text-xs font-medium text-ink-soft">Password</label>
+                  <div className="mt-1 flex items-center gap-2 rounded-xl border border-teal/20 bg-ivory-50 px-3 py-2.5">
+                    <KeyRound size={15} className="text-ink-muted" />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-transparent text-sm text-ink outline-none" />
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {(localErr || error) && <div className="rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-risk-high">{localErr || error}</div>}
+              {(localErr || (!devMode && error)) && <div className="rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-risk-high">{localErr || error}</div>}
 
-              <button type="submit" disabled={loading} className="btn-glow w-full rounded-xl bg-teal px-4 py-3 text-sm font-semibold text-white shadow-glow hover:bg-teal-dark disabled:opacity-50">
-                {loading ? 'Signing in…' : 'Sign in to dashboard'}
+              <button type="submit" disabled={loading && !devMode} className={`btn-glow w-full rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-glow disabled:opacity-50 ${devMode ? 'bg-royal hover:bg-royal-dark' : 'bg-teal hover:bg-teal-dark'}`}>
+                {devMode ? 'Enter demo as selected role' : loading ? 'Signing in…' : 'Sign in to dashboard'}
               </button>
             </form>
 
@@ -139,8 +177,10 @@ export function Login() {
               <span className="rounded-md bg-ivory-200 px-2 py-1 text-[10px] font-medium text-ink-muted">MFA · placeholder</span>
             </div>
 
-            <div className="mt-5 rounded-lg border border-saffron/20 bg-saffron-soft/60 px-3 py-2 text-[11px] text-saffron-deep">
-              Development demo mode · all seeded users share password <b>Passw0rd!</b>
+            <div className={`mt-5 rounded-lg border px-3 py-2 text-[11px] ${devMode ? 'border-royal/20 bg-royal-soft/60 text-royal-dark' : 'border-saffron/20 bg-saffron-soft/60 text-saffron-deep'}`}>
+              {devMode
+                ? 'Dev mode · client-only demo, no backend. Pick a role above and enter — pages show bundled demo data.'
+                : <>Development demo mode · all seeded users share password <b>Passw0rd!</b></>}
             </div>
           </div>
         </motion.div>

@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { FilePlus2 } from 'lucide-react';
 import { api } from '../lib/api';
+import { useAuth } from '../store/auth';
+import { demoQueueFor } from '../data/demoQueueData';
 import { GlassPanel, StatusPill } from '../design-system/components';
 import { workflowLabels } from '../design-system/tokens';
 
@@ -15,10 +17,14 @@ export interface QueueConfig {
 
 /** Generic role queue — lists applications at the role's active stage. */
 export function Queue({ config }: { config: QueueConfig }) {
+  const devMode = useAuth((s) => s.devMode);
   const { data, isLoading, error } = useQuery({
     queryKey: ['queue', config.endpoint],
     queryFn: () => api.get<any[]>(config.endpoint),
   });
+
+  // Dev/demo mode: backend calls resolve null, so seed the queue from demo data.
+  const rows = devMode && !(data ?? []).length ? demoQueueFor(config.endpoint) : data ?? [];
 
   return (
     <div className="space-y-6">
@@ -51,7 +57,7 @@ export function Queue({ config }: { config: QueueConfig }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-teal/8">
-            {(data ?? []).map((a) => (
+            {rows.map((a) => (
               <tr key={a.id} className="hover:bg-teal-soft/40">
                 <td className="px-4 py-3 font-medium text-ink">{a.code}</td>
                 <td className="px-4 py-3 text-ink-soft">{workflowLabels[a.workflowType] ?? a.workflowType}</td>
@@ -65,7 +71,7 @@ export function Queue({ config }: { config: QueueConfig }) {
                 </td>
               </tr>
             ))}
-            {(data ?? []).length === 0 && !isLoading && (
+            {rows.length === 0 && !isLoading && (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-ink-muted">
                   Queue is empty.

@@ -16,7 +16,17 @@ export function setToken(token: string | null) {
   else localStorage.removeItem(TOKEN_KEY);
 }
 
+/** True when a client-only demo session is active (set by the dev-mode login). */
+function isDevSession(): boolean {
+  return !!localStorage.getItem('dd_dev_user');
+}
+
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  // Dev/demo mode: never hit the network. Resolve null so callers fall back to
+  // their bundled demo data (they all read with `?? fallback`).
+  if (isDevSession()) {
+    return null as unknown as T;
+  }
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;

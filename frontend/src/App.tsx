@@ -46,7 +46,7 @@ export function App() {
 
   useEffect(() => {
     (async () => {
-      if (getToken()) await restore();
+      if (getToken() || localStorage.getItem('dd_dev_user')) await restore();
       setReady(true);
     })();
   }, [restore]);
